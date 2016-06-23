@@ -5,7 +5,7 @@ This module allows recursive traversal of the file system starting from a path. 
 **Example**
 
 ```
-var walk = require('fs-walker').walk
+var walk = require('fs-walker-rx').walk
 
 var path = process.env.HOME + '/Desktop'
 
