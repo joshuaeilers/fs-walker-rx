@@ -1,0 +1,21 @@
+{
+  "name": "fs-walker-rx",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jasmine",
+    "postinstall": "typings install",
+    "tsc": "tsc",
+    "tsc:w": "tsc -w",
+    "typings": "typings"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "rxjs": "5.0.0-beta.6"
+  },
+  "devDependencies": {
+    "jasmine": "^2.4.1",
+    "tslint": "^3.11.0",
+    "typescript": "^1.8.10",
+    "typings": "^1.0.4"
+  }
+}
