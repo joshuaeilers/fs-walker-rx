@@ -1,9 +1,15 @@
 {
   "name": "fs-walker-rx",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "index.js",
-  "url" : "https://github.com/joshuaeilers/file-walker-rx",
-  "email" : "eilers.joshua@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshuaeilers/file-walker-rx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/joshuaeilers/file-walker-rx/issues"
+  },
+  "homepage": "https://github.com/ashleygwilliams/my_package",
   "scripts": {
     "test": "jasmine",
     "postinstall": "typings install",
