@@ -1,6 +1,6 @@
 "use strict";
 const fs_walker_1 = require('../fs-walker');
-const path = __dirname + '/testing_dir';
+const path = `${__dirname}/testing_dir`;
 describe('walk', () => {
     it('should find all files under a directory tree', (done) => {
         const expectedValues = [

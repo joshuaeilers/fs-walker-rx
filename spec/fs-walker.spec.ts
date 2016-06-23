@@ -1,6 +1,6 @@
 import { walk } from '../fs-walker'
 
-const path = __dirname + '/testing_dir'
+const path = `${__dirname}/testing_dir`
 
 describe('walk', () => {
   it('should find all files under a directory tree', (done) => {
