@@ -3,7 +3,9 @@
 This module allows recursive traversal of the file system starting from a path. Since it uses Observables, any kind of filtering or operators can be applied before subscribing.
 
 **Installation**
-```npm install file-walker-rx```
+```
+npm install file-walker-rx
+```
 
 **Example**
 
