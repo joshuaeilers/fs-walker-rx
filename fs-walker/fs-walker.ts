@@ -1,8 +1,9 @@
-import { readdir, stat, Stats } from 'fs'
+import { readdir, lstat, Stats } from 'fs'
 import { Observable } from 'rxjs/Rx'
+import * as path from 'path'
 
 const readdir$ = Observable.bindNodeCallback(readdir)
-const stat$ = Observable.bindNodeCallback(stat)
+const stat$ = Observable.bindNodeCallback(lstat)
 
 export interface FsObject {
   name: string
@@ -10,16 +11,20 @@ export interface FsObject {
   stats: Stats
 }
 
-export function walk(startingPath): Observable<FsObject> {
-  return walkHelper(startingPath)
+export function walk(currentDir: string, dirBlacklist?: string[]): Observable<FsObject> {
+  let dirBlacklistSet = new Set<string>()
+  if (dirBlacklist) {
+    dirBlacklist.forEach(name => dirBlacklistSet.add(name))
+  }
+  return walkHelper(currentDir, dirBlacklistSet)
 }
 
-function walkHelper(path) {
-  const fileNameInThisPath$ = readdir$(path)
+function walkHelper(currentDir: string, dirBlacklist: Set<string>) {
+  const fileNameInThisPath$ = readdir$(currentDir)
     .concatMap(fileNames => Observable.from(fileNames))
 
   const fsObject$ = fileNameInThisPath$
-    .map(fileName => ({ name: fileName, path: `${path}/${fileName}`, stats: null }))
+    .map(fileName => ({ name: fileName, path: path.join(currentDir, fileName), stats: null }))
 
   const fsObjectWithStats$ = fsObject$
     .concatMap(fsObject =>
@@ -31,11 +36,17 @@ function walkHelper(path) {
     )
 
   const everythingBelow$ = fsObjectWithStats$
-    .concatMap(fsObject =>
-      fsObject.stats.isDirectory()
-        ? walkHelper(fsObject.path)
-        : Observable.of(fsObject)
-    )
+    .concatMap(fsObject => {
+      if (fsObject.stats.isDirectory()) {
+        if (dirBlacklist.has(fsObject.name)) {
+          return Observable.empty()
+        } else {
+          return walkHelper(fsObject.path, dirBlacklist)
+        }
+      } else {
+        return Observable.of(fsObject)
+      }
+    })
 
   return everythingBelow$
 }
