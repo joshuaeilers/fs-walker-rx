@@ -1,5 +1,6 @@
 "use strict";
-const fs_walker_1 = require('../fs-walker');
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs_walker_1 = require("../fs-walker");
 const path = `${__dirname}/testing_dir`;
 describe('walk', () => {
     it('should find all files under a directory tree', (done) => {

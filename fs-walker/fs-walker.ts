@@ -1,6 +1,6 @@
 import { readdir, lstat, Stats } from 'fs'
-import { Observable } from 'rxjs/Rx'
 import * as path from 'path'
+import { Observable } from 'rxjs/Rx'
 
 const readdir$ = Observable.bindNodeCallback(readdir)
 const stat$ = Observable.bindNodeCallback(lstat)
@@ -12,7 +12,7 @@ export interface FsObject {
 }
 
 export function walk(currentDir: string, dirBlacklist?: string[]): Observable<FsObject> {
-  let dirBlacklistSet = new Set<string>()
+  const dirBlacklistSet = new Set<string>()
   if (dirBlacklist) {
     dirBlacklist.forEach(name => dirBlacklistSet.add(name))
   }
@@ -20,33 +20,20 @@ export function walk(currentDir: string, dirBlacklist?: string[]): Observable<Fs
 }
 
 function walkHelper(currentDir: string, dirBlacklist: Set<string>) {
-  const fileNameInThisPath$ = readdir$(currentDir)
-    .concatMap(fileNames => Observable.from(fileNames))
-
-  const fsObject$ = fileNameInThisPath$
-    .map(fileName => ({ name: fileName, path: path.join(currentDir, fileName), stats: null }))
-
-  const fsObjectWithStats$ = fsObject$
-    .concatMap(fsObject =>
-      stat$(fsObject.path)
-        .map(stats => {
-          fsObject.stats = stats
-          return fsObject
-        })
-    )
-
-  const everythingBelow$ = fsObjectWithStats$
-    .concatMap(fsObject => {
-      if (fsObject.stats.isDirectory()) {
-        if (dirBlacklist.has(fsObject.name)) {
-          return Observable.empty()
-        } else {
-          return walkHelper(fsObject.path, dirBlacklist)
-        }
-      } else {
-        return Observable.of(fsObject)
-      }
+  return readdir$(currentDir)
+    .concatMap(names => Observable.from(names))
+    .concatMap(name => {
+      const filePath = path.join(currentDir, name)
+      return stat$(filePath)
+        .map(stats => ({ name, path: filePath, stats }))
     })
-
-  return everythingBelow$
+    .concatMap(obj =>
+      obj.stats.isDirectory()
+        ? (
+          dirBlacklist.has(obj.name)
+            ? Observable.empty()
+            : walkHelper(obj.path, dirBlacklist)
+        )
+        : Observable.of(obj)
+    )
 }

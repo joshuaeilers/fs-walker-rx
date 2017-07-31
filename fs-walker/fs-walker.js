@@ -1,11 +1,12 @@
 "use strict";
-const fs_1 = require('fs');
-const Rx_1 = require('rxjs/Rx');
-const path = require('path');
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs_1 = require("fs");
+const path = require("path");
+const Rx_1 = require("rxjs/Rx");
 const readdir$ = Rx_1.Observable.bindNodeCallback(fs_1.readdir);
 const stat$ = Rx_1.Observable.bindNodeCallback(fs_1.lstat);
 function walk(currentDir, dirBlacklist) {
-    let dirBlacklistSet = new Set();
+    const dirBlacklistSet = new Set();
     if (dirBlacklist) {
         dirBlacklist.forEach(name => dirBlacklistSet.add(name));
     }
@@ -13,29 +14,16 @@ function walk(currentDir, dirBlacklist) {
 }
 exports.walk = walk;
 function walkHelper(currentDir, dirBlacklist) {
-    const fileNameInThisPath$ = readdir$(currentDir)
-        .concatMap(fileNames => Rx_1.Observable.from(fileNames));
-    const fsObject$ = fileNameInThisPath$
-        .map(fileName => ({ name: fileName, path: path.join(currentDir, fileName), stats: null }));
-    const fsObjectWithStats$ = fsObject$
-        .concatMap(fsObject => stat$(fsObject.path)
-        .map(stats => {
-        fsObject.stats = stats;
-        return fsObject;
-    }));
-    const everythingBelow$ = fsObjectWithStats$
-        .concatMap(fsObject => {
-        if (fsObject.stats.isDirectory()) {
-            if (dirBlacklist.has(fsObject.name)) {
-                return Rx_1.Observable.empty();
-            }
-            else {
-                return walkHelper(fsObject.path, dirBlacklist);
-            }
-        }
-        else {
-            return Rx_1.Observable.of(fsObject);
-        }
-    });
-    return everythingBelow$;
+    return readdir$(currentDir)
+        .concatMap(names => Rx_1.Observable.from(names))
+        .concatMap(name => {
+        const filePath = path.join(currentDir, name);
+        return stat$(filePath)
+            .map(stats => ({ name, path: filePath, stats }));
+    })
+        .concatMap(obj => obj.stats.isDirectory()
+        ? (dirBlacklist.has(obj.name)
+            ? Rx_1.Observable.empty()
+            : walkHelper(obj.path, dirBlacklist))
+        : Rx_1.Observable.of(obj));
 }
