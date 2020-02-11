@@ -9,7 +9,7 @@
   "bugs": {
     "url": "https://github.com/joshuaeilers/fs-walker-rx/issues"
   },
-  "homepage": "https://github.com/ashleygwilliams/my_package",
+  "homepage": "https://github.com/joshuaeilers/fs-walker-rx",
   "scripts": {
     "test": "jasmine",
     "tsc": "tsc",
